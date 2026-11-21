@@ -45,7 +45,7 @@ If you came here looking for the desktop application, this is the wrong page: th
 - [Terra Station staking](https://github.com/terraclassic-wallet/terra-classic-wallet-guides/blob/main/terra-station-staking.md) - Delegation, rewards and the unbonding period in one pass.
 - [LUNC staking APR](https://github.com/terraclassic-wallet/terra-classic-wallet-guides/blob/main/lunc-staking-apr.md) - Why the rate moves, and how to read it without a calculator.
 
-## How to use this repository
+## How to use this repository.
 
 1. Read the requirements before installing anything. The README asks for a validator node, a network split between public and private, an instance for the node that broadcasts, an internet-facing instance for the price server, and an instance for the feeder inside the private network.
 2. Decide between the two deployment routes. `docker-compose` is the recommended route and the README labels it experimental; the manual route is Node.js and two `npm` projects.
